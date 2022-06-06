@@ -2,6 +2,7 @@ package pl.mariuszk.starfighter;
 
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.math.Rectangle;
 
 abstract class Ship {
 
@@ -14,6 +15,7 @@ abstract class Ship {
     float yPosition;
     float width;
     float height;
+    Rectangle boundingBox;
 
     //laser information;
     float laserWidth;
@@ -44,9 +46,12 @@ abstract class Ship {
         this.shipTextureRegion = shipTextureRegion;
         this.shieldTextureRegion = shieldTextureRegion;
         this.laserTextureRegion = laserTextureRegion;
+
+        boundingBox = new Rectangle(xPosition, yPosition, width, height);
     }
 
     void update(float deltaTime) {
+        boundingBox.set(xPosition, yPosition, width, height);
         timeSinceLastShot += deltaTime;
     }
 
@@ -64,4 +69,14 @@ abstract class Ship {
     }
 
     abstract Laser[] fireLasers();
+
+    boolean intersects(Rectangle otherRectangle) {
+        return boundingBox.overlaps(otherRectangle);
+    }
+
+    void hit(Laser laser) {
+        if (shield > 0) {
+            shield--;
+        }
+    }
 }
