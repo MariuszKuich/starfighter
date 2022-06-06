@@ -16,10 +16,11 @@ class GameScreen implements Screen {
 
     //graphics
     private final SpriteBatch batch;
-    private final Texture background;
+    private final Texture[] backgrounds;
 
     //timing
-    private int backgroundOffset;
+    private final float[] backgroundOffsets = {0, 0, 0, 0};
+    private final float backgroundMaxScrollingSpeed;
 
     //world parameters
     private final int WORLD_WIDTH = 72;
@@ -29,26 +30,42 @@ class GameScreen implements Screen {
         camera = new OrthographicCamera();
         viewport = new StretchViewport(WORLD_WIDTH, WORLD_HEIGHT, camera);
 
-        background = new Texture("darkPurpleStarscape.png");
-        backgroundOffset = 0;
+        backgrounds = new Texture[4];
+        backgrounds[0] = new Texture("Starscape00.png");
+        backgrounds[1] = new Texture("Starscape01.png");
+        backgrounds[2] = new Texture("Starscape02.png");
+        backgrounds[3] = new Texture("Starscape03.png");
+
+        backgroundMaxScrollingSpeed = (float)(WORLD_HEIGHT) / 4;
 
         batch = new SpriteBatch();
     }
 
     @Override
-    public void render(float delta) {
+    public void render(float deltaTime) {
         batch.begin();
 
         //scrolling background
-        backgroundOffset++;
-        if (backgroundOffset % WORLD_HEIGHT == 0) {
-            backgroundOffset = 0;
-        }
-
-        batch.draw(background, 0, -backgroundOffset, WORLD_WIDTH, WORLD_HEIGHT);
-        batch.draw(background, 0, -backgroundOffset + WORLD_HEIGHT, WORLD_WIDTH, WORLD_HEIGHT);
+        renderBackground(deltaTime);
 
         batch.end();
+    }
+
+    private void renderBackground(float deltaTime) {
+        backgroundOffsets[0] += deltaTime * backgroundMaxScrollingSpeed / 8;
+        backgroundOffsets[1] += deltaTime * backgroundMaxScrollingSpeed / 4;
+        backgroundOffsets[2] += deltaTime * backgroundMaxScrollingSpeed / 2;
+        backgroundOffsets[3] += deltaTime * backgroundMaxScrollingSpeed;
+
+        for (int layer = 0; layer < backgroundOffsets.length; layer++) {
+            if (backgroundOffsets[layer] > WORLD_HEIGHT) {
+                backgroundOffsets[layer] = 0;
+            }
+
+            batch.draw(backgrounds[layer], 0, -backgroundOffsets[layer], WORLD_WIDTH, WORLD_HEIGHT);
+            batch.draw(backgrounds[layer], 0, -backgroundOffsets[layer] + WORLD_HEIGHT,
+                    WORLD_WIDTH, WORLD_HEIGHT);
+        }
     }
 
     @Override
