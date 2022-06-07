@@ -70,4 +70,8 @@ abstract class Ship {
             shield--;
         }
     }
+
+    void translate(float xChange, float yChange) {
+        boundingBox.setPosition(boundingBox.x + xChange, boundingBox.y + yChange);
+    }
 }

@@ -1,5 +1,7 @@
 package pl.mariuszk.starfighter;
 
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.OrthographicCamera;
@@ -64,7 +66,7 @@ class GameScreen implements Screen {
 
         //set up game objects
         playerShip = new PlayerShip((float)WORLD_WIDTH / 2, (float)WORLD_HEIGHT / 4,
-                10, 10, 2, 3,
+                10, 10, 48, 3,
                 0.4f, 4, 45, 0.5f,
                 playerShipTextureRegion, playerShieldTextureRegion, playerLaserTextureRegion);
         enemyShip = new EnemyShip((float)WORLD_WIDTH / 2, (float)WORLD_HEIGHT * 3 / 4,
@@ -81,6 +83,8 @@ class GameScreen implements Screen {
     @Override
     public void render(float deltaTime) {
         batch.begin();
+
+        detectInput(deltaTime);
 
         playerShip.update(deltaTime);
         enemyShip.update(deltaTime);
@@ -104,6 +108,30 @@ class GameScreen implements Screen {
         renderExplosions(deltaTime);
 
         batch.end();
+    }
+
+    private void detectInput(float deltaTime) {
+        float leftLimit = -playerShip.boundingBox.x;
+        float downLimit = -playerShip.boundingBox.y;
+        float rightLimit = WORLD_WIDTH - playerShip.boundingBox.x - playerShip.boundingBox.width;
+        float upLimit = (float)WORLD_HEIGHT / 2 - playerShip.boundingBox.y - playerShip.boundingBox.height;
+
+        //keyboard input
+        if (Gdx.input.isKeyPressed(Input.Keys.RIGHT) && rightLimit > 0) {
+            playerShip.translate(Math.min(playerShip.movementSpeed * deltaTime, rightLimit), 0f);
+        }
+        if (Gdx.input.isKeyPressed(Input.Keys.UP) && upLimit > 0) {
+            playerShip.translate(0f, Math.min(playerShip.movementSpeed * deltaTime, upLimit));
+        }
+        if (Gdx.input.isKeyPressed(Input.Keys.LEFT) && leftLimit < 0) {
+            playerShip.translate(Math.max(-playerShip.movementSpeed * deltaTime, leftLimit), 0f);
+        }
+        if (Gdx.input.isKeyPressed(Input.Keys.DOWN) && downLimit < 0) {
+            playerShip.translate(0f, Math.max(-playerShip.movementSpeed * deltaTime, downLimit));
+        }
+
+        //touch input (also mouse)
+
     }
 
     private void renderBackground(float deltaTime) {
