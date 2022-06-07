@@ -16,9 +16,9 @@ class EnemyShip extends Ship {
     @Override
     Laser[] fireLasers() {
         Laser[] lasers = new Laser[2];
-        lasers[0] = new Laser(xPosition + width * 0.25f, yPosition - laserHeight,
+        lasers[0] = new Laser(boundingBox.x + boundingBox.width * 0.25f, boundingBox.y - laserHeight,
                 laserWidth, laserHeight, laserMovementSpeed, laserTextureRegion);
-        lasers[1] = new Laser(xPosition + width * 0.75f, yPosition - laserHeight,
+        lasers[1] = new Laser(boundingBox.x + boundingBox.width * 0.75f, boundingBox.y - laserHeight,
                 laserWidth, laserHeight, laserMovementSpeed, laserTextureRegion);
 
         timeSinceLastShot = 0;
@@ -28,6 +28,6 @@ class EnemyShip extends Ship {
 
     @Override
     void draw(Batch batch) {
-        draw(batch, yPosition - height * 0.2f);
+        draw(batch, boundingBox.y - boundingBox.height * 0.2f);
     }
 }

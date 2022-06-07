@@ -139,8 +139,8 @@ class GameScreen implements Screen {
         while (iterator.hasNext()) {
             Laser laser = iterator.next();
             laser.draw(batch);
-            laser.yPosition += laser.movementSpeed * deltaTime;
-            if (laser.yPosition > WORLD_HEIGHT) {
+            laser.boundingBox.y += laser.movementSpeed * deltaTime;
+            if (laser.boundingBox.y > WORLD_HEIGHT) {
                 iterator.remove();
             }
         }
@@ -148,8 +148,8 @@ class GameScreen implements Screen {
         while (iterator.hasNext()) {
             Laser laser = iterator.next();
             laser.draw(batch);
-            laser.yPosition -= laser.movementSpeed * deltaTime;
-            if (laser.yPosition + laser.height < 0) {
+            laser.boundingBox.y -= laser.movementSpeed * deltaTime;
+            if (laser.boundingBox.y + laser.boundingBox.height < 0) {
                 iterator.remove();
             }
         }
@@ -159,7 +159,7 @@ class GameScreen implements Screen {
         ListIterator<Laser> iterator = playerLaserList.listIterator();
         while (iterator.hasNext()) {
             Laser laser = iterator.next();
-            if (enemyShip.intersects(laser.getBoundingBox())) {
+            if (enemyShip.intersects(laser.boundingBox)) {
                 enemyShip.hit(laser);
                 iterator.remove();
             }
@@ -167,7 +167,7 @@ class GameScreen implements Screen {
         iterator = enemyLaserList.listIterator();
         while (iterator.hasNext()) {
             Laser laser = iterator.next();
-            if (playerShip.intersects(laser.getBoundingBox())) {
+            if (playerShip.intersects(laser.boundingBox)) {
                 playerShip.hit(laser);
                 iterator.remove();
             }

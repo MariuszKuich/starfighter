@@ -11,10 +11,6 @@ abstract class Ship {
     int shield;
 
     //position & dimension
-    float xPosition;
-    float yPosition;
-    float width;
-    float height;
     Rectangle boundingBox;
 
     //laser information;
@@ -33,10 +29,6 @@ abstract class Ship {
                 int shield, float laserWidth, float laserHeight, float laserMovementSpeed,
                 float timeBetweenShots, TextureRegion shipTextureRegion,
                 TextureRegion shieldTextureRegion, TextureRegion laserTextureRegion) {
-        this.xPosition = xCentre - width / 2;
-        this.yPosition = yCentre - height / 2;
-        this.width = width;
-        this.height = height;
         this.movementSpeed = movementSpeed;
         this.shield = shield;
         this.laserWidth = laserWidth;
@@ -47,20 +39,19 @@ abstract class Ship {
         this.shieldTextureRegion = shieldTextureRegion;
         this.laserTextureRegion = laserTextureRegion;
 
-        boundingBox = new Rectangle(xPosition, yPosition, width, height);
+        boundingBox = new Rectangle(xCentre - width / 2, yCentre - height / 2, width, height);
     }
 
     void update(float deltaTime) {
-        boundingBox.set(xPosition, yPosition, width, height);
         timeSinceLastShot += deltaTime;
     }
 
     abstract void draw(Batch batch);
 
     void draw(Batch batch, float shieldPosition) {
-        batch.draw(shipTextureRegion, xPosition, yPosition, width, height);
+        batch.draw(shipTextureRegion, boundingBox.x, boundingBox.y, boundingBox.width, boundingBox.height);
         if (shield > 0) {
-            batch.draw(shieldTextureRegion, xPosition, shieldPosition, width, height);
+            batch.draw(shieldTextureRegion, boundingBox.x, shieldPosition, boundingBox.width, boundingBox.height);
         }
     }
 
