@@ -65,10 +65,12 @@ abstract class Ship {
         return boundingBox.overlaps(otherRectangle);
     }
 
-    void hit(Laser laser) {
+    boolean hitAndCheckDestroyed(Laser laser) {
         if (shield > 0) {
             shield--;
+            return false;
         }
+        return true;
     }
 
     void translate(float xChange, float yChange) {

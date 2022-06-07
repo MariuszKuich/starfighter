@@ -5,9 +5,11 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.viewport.StretchViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
@@ -29,6 +31,7 @@ class GameScreen implements Screen {
     TextureRegion enemyShipTextureRegion;
     TextureRegion enemyShieldTextureRegion;
     TextureRegion enemyLaserTextureRegion;
+    private final Texture explosionTexture;
 
     //timing
     private final float[] backgroundOffsets = {0, 0, 0, 0};
@@ -44,6 +47,7 @@ class GameScreen implements Screen {
     private final LinkedList<EnemyShip> enemyShipList;
     private final List<Laser> playerLaserList;
     private final List<Laser> enemyLaserList;
+    private final LinkedList<Explosion> explosionList;
 
     GameScreen() {
         camera = new OrthographicCamera();
@@ -68,6 +72,7 @@ class GameScreen implements Screen {
         enemyShipTextureRegion = textureAtlas.findRegion("enemyBlue1");
         enemyShieldTextureRegion = textureAtlas.findRegion("shield1");
         enemyLaserTextureRegion = textureAtlas.findRegion("laserBlue13");
+        explosionTexture = new Texture("exp.png");
 
         //set up game objects
         playerShip = new PlayerShip((float)WORLD_WIDTH / 2, (float)WORLD_HEIGHT / 4,
@@ -79,6 +84,7 @@ class GameScreen implements Screen {
 
         playerLaserList = new LinkedList<>();
         enemyLaserList = new LinkedList<>();
+        explosionList = new LinkedList<>();
 
         batch = new SpriteBatch();
     }
@@ -118,14 +124,14 @@ class GameScreen implements Screen {
         detectCollisions();
 
         //explosions
-        renderExplosions(deltaTime);
+        updateAndRenderExplosions(deltaTime);
 
         batch.end();
     }
 
     private void spawnEnemyShips(float deltaTime) {
         enemySpawnTimer += deltaTime;
-        float timeBetweenEnemySpawns = 3f;
+        float timeBetweenEnemySpawns = 1f;
         if (enemySpawnTimer > timeBetweenEnemySpawns) {
             enemyShipList.add(
                     new EnemyShip(StarfighterGame.random.nextFloat() * (WORLD_WIDTH - 10) + 5,
@@ -275,7 +281,11 @@ class GameScreen implements Screen {
                 EnemyShip enemyShip = enemyShipListIterator.next();
 
                 if (enemyShip.intersects(laser.boundingBox)) {
-                    enemyShip.hit(laser);
+                    if (enemyShip.hitAndCheckDestroyed(laser)) {
+                        enemyShipListIterator.remove();
+                        explosionList.add(new Explosion(explosionTexture,
+                                new Rectangle(enemyShip.boundingBox), 0.7f));
+                    }
                     laserListIterator.remove();
                     break;
                 }
@@ -285,14 +295,27 @@ class GameScreen implements Screen {
         while (laserListIterator.hasNext()) {
             Laser laser = laserListIterator.next();
             if (playerShip.intersects(laser.boundingBox)) {
-                playerShip.hit(laser);
+                if (playerShip.hitAndCheckDestroyed(laser)) {
+                    explosionList.add(new Explosion(explosionTexture,
+                            new Rectangle(playerShip.boundingBox), 1.6f));
+                    playerShip.shield = 10;
+                }
                 laserListIterator.remove();
             }
         }
     }
 
-    private void renderExplosions(float deltaTime) {
-
+    private void updateAndRenderExplosions(float deltaTime) {
+        ListIterator<Explosion> explosionListIterator = explosionList.listIterator();
+        while (explosionListIterator.hasNext()) {
+            Explosion explosion = explosionListIterator.next();
+            explosion.update(deltaTime);
+            if (explosion.isFinished()) {
+                explosionListIterator.remove();
+            } else {
+                explosion.draw(batch);
+            }
+        }
     }
 
     @Override
