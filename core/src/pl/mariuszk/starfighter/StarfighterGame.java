@@ -2,9 +2,12 @@ package pl.mariuszk.starfighter;
 
 import com.badlogic.gdx.Game;
 
+import java.util.Random;
+
 public class StarfighterGame extends Game {
 
 	GameScreen gameScreen;
+	public static Random random = new Random();
 
 	@Override
 	public void create() {

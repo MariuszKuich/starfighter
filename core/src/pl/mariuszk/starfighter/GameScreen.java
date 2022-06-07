@@ -37,8 +37,8 @@ class GameScreen implements Screen {
     private final float MOVEMENT_THRESHOLD = 0.5f;
 
     //game objects
-    private final Ship playerShip;
-    private final Ship enemyShip;
+    private final PlayerShip playerShip;
+    private final EnemyShip enemyShip;
     private final List<Laser> playerLaserList;
     private final List<Laser> enemyLaserList;
 
@@ -71,8 +71,9 @@ class GameScreen implements Screen {
                 10, 10, 48, 3,
                 0.4f, 4, 45, 0.5f,
                 playerShipTextureRegion, playerShieldTextureRegion, playerLaserTextureRegion);
-        enemyShip = new EnemyShip((float)WORLD_WIDTH / 2, (float)WORLD_HEIGHT * 3 / 4,
-                10, 10, 2, 1,
+        enemyShip = new EnemyShip(StarfighterGame.random.nextFloat() * (WORLD_WIDTH - 10) + 5,
+                WORLD_HEIGHT - 5,
+                10, 10, 48, 1,
                 0.3f, 5, 50, 0.8f,
                 enemyShipTextureRegion, enemyShieldTextureRegion, enemyLaserTextureRegion);
 
@@ -87,6 +88,7 @@ class GameScreen implements Screen {
         batch.begin();
 
         detectInput(deltaTime);
+        moveEnemies(deltaTime);
 
         playerShip.update(deltaTime);
         enemyShip.update(deltaTime);
@@ -168,6 +170,29 @@ class GameScreen implements Screen {
                 playerShip.translate(xMove, yMove);
             }
         }
+    }
+
+    private void moveEnemies(float deltaTime) {
+        float leftLimit = -enemyShip.boundingBox.x;
+        float downLimit = (float)WORLD_HEIGHT / 2 - enemyShip.boundingBox.y;
+        float rightLimit = WORLD_WIDTH - enemyShip.boundingBox.x - enemyShip.boundingBox.width;
+        float upLimit = WORLD_HEIGHT - enemyShip.boundingBox.y - enemyShip.boundingBox.height;
+
+        float xMove = enemyShip.getDirectionVector().x * enemyShip.movementSpeed * deltaTime;
+        float yMove = enemyShip.getDirectionVector().y * enemyShip.movementSpeed * deltaTime;
+
+        if (xMove > 0) {
+            xMove = Math.min(xMove, rightLimit);
+        } else {
+            xMove = Math.max(xMove, leftLimit);
+        }
+        if (yMove > 0) {
+            yMove = Math.min(yMove, upLimit);
+        } else {
+            yMove = Math.max(yMove, downLimit);
+        }
+
+        enemyShip.translate(xMove, yMove);
     }
 
     private void renderBackground(float deltaTime) {
