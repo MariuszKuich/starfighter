@@ -8,6 +8,7 @@ import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.viewport.StretchViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 
@@ -33,6 +34,7 @@ class GameScreen implements Screen {
     //world parameters
     private final int WORLD_WIDTH = 72;
     private final int WORLD_HEIGHT = 128;
+    private final float MOVEMENT_THRESHOLD = 0.5f;
 
     //game objects
     private final Ship playerShip;
@@ -131,7 +133,41 @@ class GameScreen implements Screen {
         }
 
         //touch input (also mouse)
+        if (Gdx.input.isTouched()) {
+            float xTouchPixels = Gdx.input.getX();
+            float yTouchPixels = Gdx.input.getY();
 
+            Vector2 touchPoint = new Vector2(xTouchPixels, yTouchPixels);
+            //transforming screen coordinates to world coordinates
+            touchPoint = viewport.unproject(touchPoint);
+
+            Vector2 playerShipCentre =
+                    new Vector2(playerShip.boundingBox.x + playerShip.boundingBox.width / 2,
+                            playerShip.boundingBox.y + playerShip.boundingBox.height / 2);
+            float touchDistance = touchPoint.dst(playerShipCentre);
+
+            if (touchDistance > MOVEMENT_THRESHOLD) {
+                float xTouchDifference = touchPoint.x - playerShipCentre.x;
+                float yTouchDifference = touchPoint.y - playerShipCentre.y;
+
+                //scale to the maximum speed of the ship
+                float xMove = xTouchDifference / touchDistance * playerShip.movementSpeed * deltaTime;
+                float yMove = yTouchDifference / touchDistance * playerShip.movementSpeed * deltaTime;
+
+                if (xMove > 0) {
+                    xMove = Math.min(xMove, rightLimit);
+                } else {
+                    xMove = Math.max(xMove, leftLimit);
+                }
+                if (yMove > 0) {
+                    yMove = Math.min(yMove, upLimit);
+                } else {
+                    yMove = Math.max(yMove, downLimit);
+                }
+//
+                playerShip.translate(xMove, yMove);
+            }
+        }
     }
 
     private void renderBackground(float deltaTime) {
