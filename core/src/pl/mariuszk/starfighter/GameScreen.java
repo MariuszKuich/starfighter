@@ -4,13 +4,17 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.Camera;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.viewport.StretchViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 
@@ -18,6 +22,7 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.Locale;
 
 class GameScreen implements Screen {
 
@@ -48,6 +53,18 @@ class GameScreen implements Screen {
     private final List<Laser> playerLaserList;
     private final List<Laser> enemyLaserList;
     private final LinkedList<Explosion> explosionList;
+    private int score = 0;
+
+    //Heads-Up Display
+    BitmapFont font;
+    float hudVerticalMargin;
+    float hudLeftX;
+    float hudRightX;
+    float hudCentreX;
+    float hudRow1Y;
+    float hudRow2Y;
+    float hudSectionWidth;
+
 
     GameScreen() {
         camera = new OrthographicCamera();
@@ -87,7 +104,31 @@ class GameScreen implements Screen {
         explosionList = new LinkedList<>();
 
         batch = new SpriteBatch();
+
+        prepareHUD();
     }
+
+    private void prepareHUD() {
+        FreeTypeFontGenerator fontGenerator = new FreeTypeFontGenerator(Gdx.files.internal("EdgeOfTheGalaxyRegular-OVEa6.otf"));
+        FreeTypeFontGenerator.FreeTypeFontParameter fontParameter = new FreeTypeFontGenerator.FreeTypeFontParameter();
+
+        fontParameter.size = 72;
+        fontParameter.borderWidth = 3.6f;
+        fontParameter.color = new Color(1, 1, 1, 0.3f);
+        fontParameter.borderColor = new Color(0, 0, 0, 0.3f);
+
+        font = fontGenerator.generateFont(fontParameter);
+        font.getData().setScale(0.08f);
+
+        hudVerticalMargin = font.getCapHeight() / 2;
+        hudLeftX = hudVerticalMargin;
+        hudRightX = (float)WORLD_WIDTH * 2 / 3 - hudLeftX;
+        hudCentreX = (float)WORLD_WIDTH / 3;
+        hudRow1Y = WORLD_HEIGHT - hudVerticalMargin;
+        hudRow2Y = hudRow1Y - hudVerticalMargin - font.getCapHeight();
+        hudSectionWidth = (float) WORLD_WIDTH /3;
+    }
+
     @Override
     public void render(float deltaTime) {
         batch.begin();
@@ -125,6 +166,9 @@ class GameScreen implements Screen {
 
         //explosions
         updateAndRenderExplosions(deltaTime);
+
+        //hud rendering
+        updateAndRenderHud();
 
         batch.end();
     }
@@ -285,6 +329,7 @@ class GameScreen implements Screen {
                         enemyShipListIterator.remove();
                         explosionList.add(new Explosion(explosionTexture,
                                 new Rectangle(enemyShip.boundingBox), 0.7f));
+                        score += 100;
                     }
                     laserListIterator.remove();
                     break;
@@ -299,6 +344,7 @@ class GameScreen implements Screen {
                     explosionList.add(new Explosion(explosionTexture,
                             new Rectangle(playerShip.boundingBox), 1.6f));
                     playerShip.shield = 10;
+                    playerShip.lives--;
                 }
                 laserListIterator.remove();
             }
@@ -316,6 +362,19 @@ class GameScreen implements Screen {
                 explosion.draw(batch);
             }
         }
+    }
+
+    private void updateAndRenderHud() {
+        font.draw(batch, "Score", hudLeftX, hudRow1Y, hudSectionWidth, Align.left, false);
+        font.draw(batch, "Shield", hudCentreX, hudRow1Y, hudSectionWidth, Align.center, false);
+        font.draw(batch, "Lives", hudRightX, hudRow1Y, hudSectionWidth, Align.right, false);
+
+        font.draw(batch, String.format(Locale.getDefault(), "%06d", score), hudLeftX, hudRow2Y,
+                hudSectionWidth, Align.left, false);
+        font.draw(batch, String.format(Locale.getDefault(), "%02d", playerShip.shield), hudCentreX, hudRow2Y, hudSectionWidth,
+                Align.center, false);
+        font.draw(batch, String.format(Locale.getDefault(), "%02d", playerShip.lives), hudRightX, hudRow2Y, hudSectionWidth,
+                Align.right, false);
     }
 
     @Override
