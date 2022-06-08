@@ -9,6 +9,7 @@ class PlayerShip extends Ship {
     boolean down;
 
     static int SHIELD_VALUE = 10;
+    static int LIVES_VALUE = 3;
 
     PlayerShip(float xCentre, float yCentre, float width, float height, float movementSpeed,
                       float laserWidth, float laserHeight, float laserMovementSpeed,
@@ -16,7 +17,7 @@ class PlayerShip extends Ship {
                       TextureRegion shieldTextureRegion, TextureRegion laserTextureRegion) {
         super(xCentre, yCentre, width, height, movementSpeed, SHIELD_VALUE, laserWidth, laserHeight,
                 laserMovementSpeed, timeBetweenShots, shipTextureRegion, shieldTextureRegion, laserTextureRegion);
-        lives = 1;
+        lives = LIVES_VALUE;
         down = false;
     }
 

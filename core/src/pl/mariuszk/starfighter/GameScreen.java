@@ -219,6 +219,10 @@ class GameScreen implements Screen {
 
         //touch input (also mouse)
         if (Gdx.input.isTouched()) {
+            if (!gameOn) {
+                restartGame();
+                return;
+            }
             float xTouchPixels = Gdx.input.getX();
             float yTouchPixels = Gdx.input.getY();
 
@@ -277,6 +281,22 @@ class GameScreen implements Screen {
         }
 
         enemyShip.translate(xMove, yMove);
+    }
+
+    private void restartGame() {
+        playerShip.down = false;
+        playerShip.lives = PlayerShip.LIVES_VALUE;
+        playerShip.shield = PlayerShip.SHIELD_VALUE;
+        playerShip.timeSinceLastShot = 0;
+
+        score = 0;
+
+        enemyShipList.clear();
+        enemyLaserList.clear();
+        playerLaserList.clear();
+        explosionList.clear();
+
+        gameOn = true;
     }
 
     private void renderBackground(float deltaTime) {
