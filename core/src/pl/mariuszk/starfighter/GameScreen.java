@@ -55,6 +55,7 @@ class GameScreen implements Screen {
     private final LinkedList<Explosion> explosionList;
     private int score = 0;
     private boolean gameOn;
+    private long gameOverTime;
 
     //Heads-Up Display
     BitmapFont font;
@@ -219,7 +220,7 @@ class GameScreen implements Screen {
 
         //touch input (also mouse)
         if (Gdx.input.isTouched()) {
-            if (!gameOn) {
+            if (!gameOn && System.currentTimeMillis() - gameOverTime > 1000) {
                 restartGame();
                 return;
             }
@@ -386,6 +387,7 @@ class GameScreen implements Screen {
     private void endGame() {
         playerShip.down = true;
         gameOn = false;
+        gameOverTime = System.currentTimeMillis();
     }
 
     private void updateAndRenderExplosions(float deltaTime) {
@@ -416,8 +418,10 @@ class GameScreen implements Screen {
         if (!gameOn) {
             font.draw(batch, "Your score", hudCentreX, hudRow3Y, hudSectionWidth, Align.center, false);
             font.draw(batch, String.format(Locale.getDefault(), "%06d", score), hudCentreX, hudRow4Y,
-                    hudSectionWidth, Align.left, false);
-            font.draw(batch, "Tap anywhere to restart", hudCentreX, hudRow5Y, hudSectionWidth, Align.center, false);
+                    hudSectionWidth, Align.center, false);
+            if (System.currentTimeMillis() - gameOverTime > 1000) {
+                font.draw(batch, "Tap anywhere to restart", hudCentreX, hudRow5Y, hudSectionWidth, Align.center, false);
+            }
         }
     }
 
