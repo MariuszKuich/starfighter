@@ -150,10 +150,7 @@ class GameScreen implements Screen {
             spawnEnemyShips(deltaTime);
         }
 
-        ListIterator<EnemyShip> enemyShipsListIterator = enemyShipList.listIterator();
-        while (enemyShipsListIterator.hasNext()) {
-            EnemyShip enemyShip = enemyShipsListIterator.next();
-
+        for (EnemyShip enemyShip : enemyShipList) {
             moveEnemy(enemyShip, deltaTime);
             enemyShip.update(deltaTime);
             enemyShip.draw(batch);
