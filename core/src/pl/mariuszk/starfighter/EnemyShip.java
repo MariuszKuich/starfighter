@@ -10,11 +10,13 @@ class EnemyShip extends Ship {
     float timeSinceLastDirectionChange = 0;
     float directionChangeFrequency = 0.75f;
 
+    static int SHIELD_VALUE = 1;
+
     EnemyShip(float xCentre, float yCentre, float width, float height, float movementSpeed,
-                      int shield, float laserWidth, float laserHeight, float laserMovementSpeed,
+                      float laserWidth, float laserHeight, float laserMovementSpeed,
                       float timeBetweenShots, TextureRegion shipTextureRegion,
                       TextureRegion shieldTextureRegion, TextureRegion laserTextureRegion) {
-        super(xCentre, yCentre, width, height, movementSpeed, shield, laserWidth, laserHeight,
+        super(xCentre, yCentre, width, height, movementSpeed, SHIELD_VALUE, laserWidth, laserHeight,
                 laserMovementSpeed, timeBetweenShots, shipTextureRegion, shieldTextureRegion, laserTextureRegion);
 
         directionVector = new Vector2(0, -1);

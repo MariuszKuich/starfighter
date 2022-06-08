@@ -54,6 +54,7 @@ class GameScreen implements Screen {
     private final List<Laser> enemyLaserList;
     private final LinkedList<Explosion> explosionList;
     private int score = 0;
+    private boolean gameOn;
 
     //Heads-Up Display
     BitmapFont font;
@@ -63,6 +64,9 @@ class GameScreen implements Screen {
     float hudCentreX;
     float hudRow1Y;
     float hudRow2Y;
+    float hudRow3Y;
+    float hudRow4Y;
+    float hudRow5Y;
     float hudSectionWidth;
 
 
@@ -93,11 +97,11 @@ class GameScreen implements Screen {
 
         //set up game objects
         playerShip = new PlayerShip((float)WORLD_WIDTH / 2, (float)WORLD_HEIGHT / 4,
-                10, 10, 48, 3,
+                10, 10, 48,
                 0.4f, 4, 45, 0.5f,
                 playerShipTextureRegion, playerShieldTextureRegion, playerLaserTextureRegion);
-
         enemyShipList = new LinkedList<>();
+        gameOn = true;
 
         playerLaserList = new LinkedList<>();
         enemyLaserList = new LinkedList<>();
@@ -126,6 +130,9 @@ class GameScreen implements Screen {
         hudCentreX = (float)WORLD_WIDTH / 3;
         hudRow1Y = WORLD_HEIGHT - hudVerticalMargin;
         hudRow2Y = hudRow1Y - hudVerticalMargin - font.getCapHeight();
+        hudRow3Y = hudRow2Y - hudVerticalMargin - font.getCapHeight();
+        hudRow4Y = hudRow3Y - hudVerticalMargin - font.getCapHeight();
+        hudRow5Y = hudRow4Y - hudVerticalMargin - font.getCapHeight();
         hudSectionWidth = (float) WORLD_WIDTH /3;
     }
 
@@ -138,8 +145,9 @@ class GameScreen implements Screen {
 
         detectInput(deltaTime);
         playerShip.update(deltaTime);
-
-        spawnEnemyShips(deltaTime);
+        if (!playerShip.down) {
+            spawnEnemyShips(deltaTime);
+        }
 
         ListIterator<EnemyShip> enemyShipsListIterator = enemyShipList.listIterator();
         while (enemyShipsListIterator.hasNext()) {
@@ -180,7 +188,7 @@ class GameScreen implements Screen {
             enemyShipList.add(
                     new EnemyShip(StarfighterGame.random.nextFloat() * (WORLD_WIDTH - 10) + 5,
                             WORLD_HEIGHT - 5,
-                            10, 10, 48, 1,
+                            10, 10, 48,
                             0.3f, 5, 50, 0.8f,
                             enemyShipTextureRegion, enemyShieldTextureRegion, enemyLaserTextureRegion)
             );
@@ -339,16 +347,25 @@ class GameScreen implements Screen {
         laserListIterator = enemyLaserList.listIterator();
         while (laserListIterator.hasNext()) {
             Laser laser = laserListIterator.next();
-            if (playerShip.intersects(laser.boundingBox)) {
+            if (playerShip.intersects(laser.boundingBox) && !playerShip.down) {
                 if (playerShip.hitAndCheckDestroyed(laser)) {
                     explosionList.add(new Explosion(explosionTexture,
                             new Rectangle(playerShip.boundingBox), 1.6f));
-                    playerShip.shield = 10;
-                    playerShip.lives--;
+                    if (playerShip.lives - 1 < 0) {
+                        endGame();
+                    } else {
+                        playerShip.shield = PlayerShip.SHIELD_VALUE;
+                        playerShip.lives--;
+                    }
                 }
                 laserListIterator.remove();
             }
         }
+    }
+
+    private void endGame() {
+        playerShip.down = true;
+        gameOn = false;
     }
 
     private void updateAndRenderExplosions(float deltaTime) {
@@ -375,6 +392,13 @@ class GameScreen implements Screen {
                 Align.center, false);
         font.draw(batch, String.format(Locale.getDefault(), "%02d", playerShip.lives), hudRightX, hudRow2Y, hudSectionWidth,
                 Align.right, false);
+
+        if (!gameOn) {
+            font.draw(batch, "Your score", hudCentreX, hudRow3Y, hudSectionWidth, Align.center, false);
+            font.draw(batch, String.format(Locale.getDefault(), "%06d", score), hudCentreX, hudRow4Y,
+                    hudSectionWidth, Align.left, false);
+            font.draw(batch, "Tap anywhere to restart", hudCentreX, hudRow5Y, hudSectionWidth, Align.center, false);
+        }
     }
 
     @Override
